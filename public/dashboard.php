@@ -54,16 +54,18 @@ require __DIR__ . '/../components/management_header.php';
         </dl>
         <h3 class="h5">Your Permissions</h3>
         <?php if ($authenticatedUser['role'] === 'admin'): ?>
-            <p>You can view your account and add, edit, or delete services.</p>
+            <p>You can view your account and add, edit, or delete services and specialist profiles.</p>
             <?php if (!isLocalRequest()): ?>
-                <p>Service management is available when you open this website on the server computer.</p>
+                <p>Management is available when you open this website on the server computer.</p>
             <?php endif; ?>
         <?php else: ?>
-            <p>You can explore services and view your account. Service management is reserved for administrators.</p>
+            <p>You can explore services, meet our specialists, and view your account. Management is reserved for administrators.</p>
         <?php endif; ?>
         <div class="management-actions mt-4">
             <a href="index.php#items" class="btn btn-primary">Explore Services</a>
+            <a href="specialists.php" class="btn btn-outline-primary">Meet Our Specialists</a>
             <?php if ($authenticatedUser['role'] === 'admin' && isLocalRequest()): ?><a href="manage_services.php" class="btn btn-outline-primary">Manage Services</a><?php endif; ?>
+            <?php if ($authenticatedUser['role'] === 'admin' && isLocalRequest()): ?><a href="manage_specialists.php" class="btn btn-outline-primary">Manage Specialists</a><?php endif; ?>
             <form method="post" action="logout.php" class="m-0">
                 <input type="hidden" name="csrf_token" value="<?= escapeHtml($token) ?>">
                 <button type="submit" class="btn btn-outline-secondary">Log Out</button>

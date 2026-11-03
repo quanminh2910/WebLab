@@ -12,8 +12,8 @@ require __DIR__ . '/management_header.php';
 ?>
 <section class="auth-panel management-panel mx-auto" aria-labelledby="access-denied-heading">
     <h1 id="access-denied-heading">Access Denied</h1>
-    <p role="alert">Administrator access is required to manage services.</p>
-    <p>You can still explore our treatments and view your account.</p>
+    <p role="alert">Administrator access is required to manage services and specialist profiles.</p>
+    <p>You can still explore our treatments, meet our specialists, and view your account.</p>
     <div class="management-actions mt-4">
         <a href="dashboard.php" class="btn btn-primary">My Account</a>
         <a href="index.php#items" class="btn btn-outline-secondary">Explore Services</a>

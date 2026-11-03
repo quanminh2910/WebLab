@@ -9,16 +9,16 @@ function requireManagementAccess(): void
     if (PHP_SAPI !== 'cli' && !isLocalRequest()) {
         http_response_code(403);
         header('Content-Type: text/plain; charset=UTF-8');
-        exit('Service management is available only on this computer during local development.');
+        exit('Management is available only on this computer during local development.');
     }
 
     try {
         requireAdministrator();
     } catch (PDOException | RuntimeException $error) {
-        error_log('Service management access error: ' . $error->getMessage());
+        error_log('Management access error: ' . $error->getMessage());
         http_response_code(503);
         header('Content-Type: text/plain; charset=UTF-8');
-        exit('Service management is temporarily unavailable. Please try again shortly.');
+        exit('Management is temporarily unavailable. Please try again shortly.');
     }
 }
 

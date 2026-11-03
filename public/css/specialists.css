@@ -1,0 +1,65 @@
+.specialists-page {
+    overflow-wrap: anywhere;
+}
+
+.specialists-intro {
+    max-width: 760px;
+}
+
+.specialist-card {
+    overflow: hidden;
+    scroll-margin-top: 1.5rem;
+}
+
+.specialist-photo {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 6 / 5;
+    object-fit: cover;
+    object-position: center 30%;
+    background-color: var(--spa-accent);
+}
+
+.specialist-specialization {
+    color: var(--spa-primary-dark);
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.specialist-biography {
+    white-space: pre-line;
+}
+
+.specialist-services {
+    padding-left: 1.1rem;
+}
+
+.specialist-services li + li {
+    margin-top: 0.5rem;
+}
+
+.specialist-services a {
+    color: var(--spa-primary-dark);
+    text-underline-offset: 0.18em;
+}
+
+.specialists-page a:focus-visible {
+    outline: 3px solid var(--spa-primary);
+    outline-offset: 3px;
+}
+
+.specialists-notice {
+    padding: 1.5rem;
+    border: 1px solid var(--spa-accent);
+    border-radius: 1rem;
+}
+
+[data-theme="dark"] .specialist-specialization,
+[data-theme="dark"] .specialist-services a {
+    color: #f0b4cf;
+}
+
+[data-theme="dark"] .specialists-notice {
+    border-color: #806b76;
+    background-color: #292126;
+}

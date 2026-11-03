@@ -14,6 +14,7 @@ $currentPage = basename($_SERVER['SCRIPT_NAME']);
 $isHomePage = $currentPage === 'index.php';
 $isItemPage = $currentPage === 'item_details.php';
 $isManagementPage = in_array($currentPage, ['manage_services.php', 'service_form.php', 'delete_service.php'], true);
+$isSpecialistManagementPage = in_array($currentPage, ['manage_specialists.php', 'specialist_form.php', 'delete_specialist.php'], true);
 $isLocalVisitor = isLocalRequest();
 ?>
 <header>
@@ -63,6 +64,11 @@ $isLocalVisitor = isLocalRequest();
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link<?= $currentPage === 'specialists.php' ? ' active' : '' ?>"
+                           <?= $currentPage === 'specialists.php' ? 'aria-current="page"' : '' ?>
+                           href="../public/specialists.php">Specialists</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" href="../public/index.php#service-search">
                             Search
                         </a>
@@ -77,6 +83,11 @@ $isLocalVisitor = isLocalRequest();
                             <a class="nav-link<?= $isManagementPage ? ' active' : '' ?>"
                                <?= $isManagementPage ? 'aria-current="page"' : '' ?>
                                href="../public/manage_services.php">Manage Services</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link<?= $isSpecialistManagementPage ? ' active' : '' ?>"
+                               <?= $isSpecialistManagementPage ? 'aria-current="page"' : '' ?>
+                               href="../public/manage_specialists.php">Manage Specialists</a>
                         </li>
                     <?php endif; ?>
                     <?php if ($navigationUser !== null): ?>
