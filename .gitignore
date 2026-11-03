@@ -25,10 +25,11 @@ Desktop.ini
 *.swo
 *~
 
-# Downloaded local compiler and report previews/build copies
+# Downloaded local LaTeX compiler
 /tools/latex/
-/docs/latex/.preview/
-/docs/latex/updated/
+
+# Lab reports, screenshots, and documentation stay local
+/docs/
 
 # LaTeX compilation intermediates
 *.aux
@@ -49,5 +50,8 @@ node_modules/
 *.7z
 *.rar
 
-# Keep application code, .htaccess files, the SQL seed, images, tests,
-# administrator setup tools, documentation, LaTeX source, and final PDFs.
+# README documents stay on this computer, not in the repository
+[Rr][Ee][Aa][Dd][Mm][Ee]*
+
+# Keep application code, .htaccess files, the SQL seed, website images,
+# tests, and administrator setup tools.
