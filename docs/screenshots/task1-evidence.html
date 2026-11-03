@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Task 1 Evidence | Spa &amp; Beauty Center</title>
+  <style>
+    :root { color-scheme: light; font-family: system-ui, sans-serif; color: #30252c; background: #faf7f9; }
+    body { max-width: 1100px; margin: 0 auto; padding: 32px 20px; line-height: 1.6; }
+    h1, h2 { color: #4b3142; line-height: 1.25; }
+    h1 { margin-bottom: 8px; }
+    a { color: #70415c; text-underline-offset: 3px; }
+    a:focus-visible { outline: 3px solid #70415c; outline-offset: 4px; }
+    nav { display: flex; flex-wrap: wrap; gap: 12px 24px; margin: 20px 0; }
+    .note { padding: 14px 18px; border-left: 4px solid #895a75; background: #eee5eb; }
+    section { margin-top: 32px; scroll-margin-top: 20px; }
+    figure { margin: 0; padding: 16px; border: 1px solid #d9cbd4; border-radius: 12px; background: #fff; }
+    img { display: block; width: 100%; height: auto; }
+    figcaption { padding-top: 10px; font-size: 0.95rem; }
+    footer { margin-top: 32px; padding-top: 16px; border-top: 1px solid #d9cbd4; }
+    @media print { body { max-width: none; padding: 0; background: #fff; } nav, footer { display: none; } figure { break-inside: avoid; } }
+  </style>
+</head>
+<body>
+  <header>
+    <p>Lab 2 &middot; Spa &amp; Beauty Center Website</p>
+    <h1>Task 1: Project Structure and Database Setup</h1>
+    <p>All three saved database-evidence screenshots are displayed below. Click an image to open it at full size.</p>
+    <nav aria-label="Evidence sections">
+      <a href="#tables">Database tables</a>
+      <a href="#services">Service records</a>
+      <a href="#relationship">Category relationship</a>
+    </nav>
+    <p class="note">These are saved Task 1 screenshots, not live database views. Later account or service changes may differ from these captures.</p>
+  </header>
+
+  <main>
+    <section id="tables" aria-labelledby="tables-heading">
+      <h2 id="tables-heading">1. Database tables</h2>
+      <figure>
+        <a href="task1-database-structure.png" target="_blank" rel="noopener">
+          <img src="task1-database-structure.png" width="1600" height="1100" alt="phpMyAdmin structure view of spa_beauty_center showing users, categories, and services tables">
+        </a>
+        <figcaption>The database structure separates accounts, service categories, and spa services.</figcaption>
+      </figure>
+    </section>
+
+    <section id="services" aria-labelledby="services-heading">
+      <h2 id="services-heading">2. Sample service records</h2>
+      <figure>
+        <a href="task1-services.png" target="_blank" rel="noopener">
+          <img src="task1-services.png" width="2400" height="1400" loading="lazy" alt="phpMyAdmin services table showing the six initial spa treatments and their stored fields">
+        </a>
+        <figcaption>The initial service records include VND prices, durations, descriptions, category IDs, and image filenames.</figcaption>
+      </figure>
+    </section>
+
+    <section id="relationship" aria-labelledby="relationship-heading">
+      <h2 id="relationship-heading">3. Category relationship</h2>
+      <figure>
+        <a href="task1-category-relationship.png" target="_blank" rel="noopener">
+          <img src="task1-category-relationship.png" width="1600" height="1100" loading="lazy" alt="phpMyAdmin relationship view showing services.category_id referencing categories.id">
+        </a>
+        <figcaption>The foreign key connects <code>services.category_id</code> to <code>categories.id</code>: one category can contain many services.</figcaption>
+      </figure>
+    </section>
+  </main>
+
+  <footer>
+    <a href="/phpmyadmin/index.php?route=/database/structure&amp;db=spa_beauty_center">Open the live database in phpMyAdmin</a>
+    &middot; <a href="../../public/">Back to the website</a>
+  </footer>
+</body>
+</html>

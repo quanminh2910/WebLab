@@ -1,0 +1,38 @@
+{
+  "stored": {
+    "capturedAtUTC": "2026-10-26T14:31:11.094Z",
+    "name": "spa_theme",
+    "value": "dark",
+    "domain": "localhost",
+    "path": "/",
+    "expiresUTC": "2026-11-25T14:31:10.877Z",
+    "remainingSeconds": 2592000,
+    "sameSite": "Lax",
+    "httpOnly": false,
+    "secure": false
+  },
+  "persisted": {
+    "capturedAtUTC": "2026-10-26T14:31:14.120Z",
+    "name": "spa_theme",
+    "value": "dark",
+    "domain": "localhost",
+    "path": "/",
+    "expiresUTC": "2026-11-25T14:31:10.877Z",
+    "remainingSeconds": 2591997,
+    "sameSite": "Lax",
+    "httpOnly": false,
+    "secure": false
+  },
+  "after-logout": {
+    "capturedAtUTC": "2026-10-26T14:31:18.408Z",
+    "name": "spa_theme",
+    "value": "dark",
+    "domain": "localhost",
+    "path": "/",
+    "expiresUTC": "2026-11-25T14:31:10.877Z",
+    "remainingSeconds": 2591992,
+    "sameSite": "Lax",
+    "httpOnly": false,
+    "secure": false
+  }
+}

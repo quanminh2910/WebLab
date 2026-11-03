@@ -1,0 +1,23 @@
+.management-page .auth-panel {
+    width: 100%;
+    max-width: 540px;
+}
+
+.management-page .auth-panel h1 {
+    margin-bottom: 0.75rem;
+    font-size: clamp(1.8rem, 5vw, 2.4rem);
+}
+
+.management-page .auth-form { margin-top: 1.5rem; }
+.management-page .auth-links a { color: var(--spa-primary-dark); }
+.management-page .auth-links a:hover { text-decoration-thickness: 2px; }
+.management-page .auth-dashboard { max-width: 900px; }
+.management-page .auth-dashboard dd { overflow-wrap: anywhere; }
+
+[data-theme="dark"] .management-page .auth-links a { color: #f0b4cf; }
+
+@media (max-width: 575.98px) {
+    .management-page .auth-panel { padding: 1.25rem; }
+    .management-page .auth-dashboard .management-actions > * { flex: 1 1 100%; }
+    .management-page .auth-dashboard .management-actions form .btn { width: 100%; }
+}

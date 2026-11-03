@@ -1,0 +1,53 @@
+# Machine-specific editor settings
+/.vscode/
+/.idea/
+
+# Local environment files and private configuration overrides
+.env
+.env.*
+!.env.example
+!.env.sample
+/config/*.local.php
+
+# Operating-system files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Logs, temporary files, and editor backups
+*.log
+*.tmp
+*.temp
+*.bak
+*.old
+*.orig
+*.swp
+*.swo
+*~
+
+# Downloaded local compiler and report previews/build copies
+/tools/latex/
+/docs/latex/.preview/
+/docs/latex/updated/
+
+# LaTeX compilation intermediates
+*.aux
+*.toc
+*.lof
+*.lot
+*.out
+*.fls
+*.fdb_latexmk
+*.synctex
+*.synctex.gz
+*.xdv
+*.dvi
+
+# Dependencies and generated submission archives
+node_modules/
+*.zip
+*.7z
+*.rar
+
+# Keep application code, .htaccess files, the SQL seed, images, tests,
+# administrator setup tools, documentation, LaTeX source, and final PDFs.

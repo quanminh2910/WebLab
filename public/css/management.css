@@ -1,0 +1,152 @@
+.management-page {
+    --management-panel: #fff;
+    --management-border: #cbb9c2;
+    --management-muted: #65565e;
+    --management-focus: #6f4358;
+    color: var(--spa-text);
+    overflow-wrap: anywhere;
+}
+
+.management-page .management-heading,
+.management-page .management-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.management-page .management-heading {
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+}
+
+.management-page .management-heading > * { min-width: 0; }
+.management-page .management-heading h1 { margin-bottom: 0.5rem; }
+.management-page .management-panel {
+    padding: clamp(1rem, 3vw, 2rem);
+    border: 1px solid var(--management-border);
+    border-radius: 1rem;
+    background-color: var(--management-panel);
+    box-shadow: 0 6px 24px rgb(73 51 63 / 7%);
+}
+
+.management-page .management-form { max-width: 900px; }
+.management-page .form-label,
+.management-page .management-table thead th { font-weight: 600; }
+.management-page .form-control,
+.management-page .form-select { min-height: 44px; }
+.management-page textarea.form-control { min-height: 150px; }
+.management-page .invalid-feedback { color: #b02a37; }
+.management-page .form-control.is-invalid,
+.management-page .form-select.is-invalid { border-color: #b02a37; }
+.management-page .form-text,
+.management-page .text-muted { color: var(--management-muted) !important; }
+.management-page .form-control,
+.management-page .form-select,
+.management-page .form-check-input { border-color: #89737f; }
+.management-page .form-control:focus,
+.management-page .form-select:focus,
+.management-page .form-check-input:focus {
+    border-color: var(--management-focus);
+    box-shadow: 0 0 0 0.2rem rgb(138 88 112 / 20%);
+}
+
+.management-page :focus-visible {
+    outline: 3px solid var(--management-focus);
+    outline-offset: 3px;
+}
+
+.management-page .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    white-space: normal;
+}
+
+.management-page .management-table {
+    --bs-table-color: var(--spa-text);
+    --bs-table-bg: var(--management-panel);
+    --bs-table-border-color: var(--management-border);
+    --bs-table-striped-bg: #f8eff3;
+    --bs-table-striped-color: var(--spa-text);
+    --bs-table-hover-bg: #f3e5ec;
+    --bs-table-hover-color: var(--spa-text);
+    min-width: 680px;
+    margin-bottom: 0;
+    vertical-align: middle;
+}
+
+.management-page .management-table > :not(caption) > * > * { padding: 0.85rem; }
+.management-page .management-table caption { color: var(--management-muted); }
+.management-page .table-responsive { border-radius: 0.5rem; }
+.management-page .management-confirmation {
+    max-width: 760px;
+    border-left: 4px solid #a32838;
+}
+
+.management-page .management-confirmation .form-check { margin: 1.25rem 0; }
+.management-page .form-check-label { cursor: pointer; }
+.management-page .form-check-input:checked {
+    border-color: var(--spa-primary-dark);
+    background-color: var(--spa-primary-dark);
+}
+
+[data-theme="dark"] .management-page {
+    --management-panel: #292126;
+    --management-border: #806b76;
+    --management-muted: #cbbdc4;
+    --management-focus: #f0b4cf;
+}
+
+[data-theme="dark"] .management-page .form-control,
+[data-theme="dark"] .management-page .form-select,
+[data-theme="dark"] .management-page .form-check-input {
+    border-color: #a38a97;
+    background-color: #21191d;
+    color: var(--spa-text);
+}
+
+[data-theme="dark"] .management-page .form-select {
+    --bs-form-select-bg-img: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%23eadfe4' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3E%3C/svg%3E");
+}
+
+[data-theme="dark"] .management-page .form-check-input:checked {
+    border-color: #c5759b;
+    background-color: #8a4c69;
+}
+
+[data-theme="dark"] .management-page .management-table {
+    --bs-table-striped-bg: #352830;
+    --bs-table-hover-bg: #432f3b;
+}
+
+[data-theme="dark"] .management-page .invalid-feedback { color: #ffb3b9; }
+[data-theme="dark"] .management-page .form-control.is-invalid,
+[data-theme="dark"] .management-page .form-select.is-invalid { border-color: #ffb3b9; }
+[data-theme="dark"] .management-page .alert-success {
+    --bs-alert-color: #c3efd8;
+    --bs-alert-bg: #20382c;
+    --bs-alert-border-color: #6da588;
+}
+
+[data-theme="dark"] .management-page .alert-danger {
+    --bs-alert-color: #ffd4d8;
+    --bs-alert-bg: #43252c;
+    --bs-alert-border-color: #c27c88;
+}
+
+[data-theme="dark"] .management-page .alert-warning {
+    --bs-alert-color: #ffe5ad;
+    --bs-alert-bg: #3d321e;
+    --bs-alert-border-color: #b99a5c;
+}
+
+[data-theme="dark"] .management-page .management-confirmation { border-left-color: #ffb3b9; }
+
+@media (max-width: 575.98px) {
+    .management-page .management-panel { padding: 1rem; }
+    .management-page .management-heading { align-items: flex-start; }
+    .management-page .management-form .management-actions .btn { flex: 1 1 150px; }
+}
