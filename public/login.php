@@ -10,12 +10,14 @@ $errorMessage = null;
 $flashMessage = null;
 $token = null;
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+$serviceQuery = validServiceSlug($_GET['service'] ?? null) ? '?service=' . rawurlencode($_GET['service']) : '';
+$destination = $serviceQuery === '' ? 'dashboard.php' : '../pages/item_details.php' . $serviceQuery . '#availability';
 
 try {
     startSpaSession();
     $authenticatedUser = currentUser();
     if ($authenticatedUser !== null) {
-        header('Location: dashboard.php', true, 303);
+        header('Location: ' . $destination, true, 303);
         exit;
     }
     if (!in_array($method, ['GET', 'POST'], true)) {
@@ -54,8 +56,10 @@ try {
                         $errorMessage = 'Invalid email or password.';
                     } else {
                         beginAuthenticatedSession($user);
-                        setAuthFlash('You are now logged in.');
-                        header('Location: dashboard.php', true, 303);
+                        if ($serviceQuery === '') {
+                            setAuthFlash('You are now logged in.');
+                        }
+                        header('Location: ' . $destination, true, 303);
                         exit;
                     }
                 }
@@ -81,7 +85,7 @@ require __DIR__ . '/../components/management_header.php';
     <?php if ($errorMessage !== null): ?><div class="alert alert-danger" role="alert"><?= escapeHtml($errorMessage) ?></div><?php endif; ?>
     <?php if ($errors !== []): ?><div class="alert alert-danger" role="alert">Please correct the highlighted fields.</div><?php endif; ?>
     <?php if ($token !== null): ?>
-        <form method="post" action="login.php" class="auth-form">
+        <form method="post" action="login.php<?= escapeHtml($serviceQuery) ?>" class="auth-form">
             <input type="hidden" name="csrf_token" value="<?= escapeHtml($token) ?>">
             <div class="mb-3">
                 <label for="login-email" class="form-label">Email address</label>
@@ -96,6 +100,6 @@ require __DIR__ . '/../components/management_header.php';
             <button type="submit" class="btn btn-primary w-100">Log In</button>
         </form>
     <?php endif; ?>
-    <p class="auth-links mb-0 mt-4">New here? <a href="register.php">Create an account</a></p>
+    <p class="auth-links mb-0 mt-4">New here? <a href="register.php<?= escapeHtml($serviceQuery) ?>">Create an account</a></p>
 </section>
 <?php require __DIR__ . '/../components/management_footer.php'; ?>

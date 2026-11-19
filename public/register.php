@@ -9,6 +9,7 @@ $errors = [];
 $errorMessage = null;
 $token = null;
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+$serviceQuery = validServiceSlug($_GET['service'] ?? null) ? '?service=' . rawurlencode($_GET['service']) : '';
 
 try {
     startSpaSession();
@@ -40,7 +41,7 @@ try {
                     // Public registration always creates a customer, regardless of submitted fields.
                     createUser($values, $validation['password'], 'customer');
                     setAuthFlash('Registration successful. Please log in.');
-                    header('Location: login.php', true, 303);
+                    header('Location: login.php' . $serviceQuery, true, 303);
                     exit;
                 }
             }
@@ -73,7 +74,7 @@ require __DIR__ . '/../components/management_header.php';
         <div class="alert alert-danger" role="alert">Please correct the highlighted fields.</div>
     <?php endif; ?>
     <?php if ($token !== null): ?>
-        <form method="post" action="register.php" class="auth-form">
+        <form method="post" action="register.php<?= escapeHtml($serviceQuery) ?>" class="auth-form">
             <input type="hidden" name="csrf_token" value="<?= escapeHtml($token) ?>">
             <div class="mb-3">
                 <label for="full-name" class="form-label">Full name</label>
@@ -99,6 +100,6 @@ require __DIR__ . '/../components/management_header.php';
             <button type="submit" class="btn btn-primary w-100">Create Account</button>
         </form>
     <?php endif; ?>
-    <p class="auth-links mb-0 mt-4">Already have an account? <a href="login.php">Log in</a></p>
+    <p class="auth-links mb-0 mt-4">Already have an account? <a href="login.php<?= escapeHtml($serviceQuery) ?>">Log in</a></p>
 </section>
 <?php require __DIR__ . '/../components/management_footer.php'; ?>

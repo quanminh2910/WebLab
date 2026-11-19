@@ -2,6 +2,12 @@
 
 require_once __DIR__ . '/database.php';
 
+function validServiceSlug(mixed $value): bool
+{
+    return is_string($value) && strlen($value) <= 150
+        && preg_match('/\A[a-z0-9]+(?:-[a-z0-9]+)*\z/', $value) === 1;
+}
+
 function serviceSearchCriteria(array $input): array
 {
     $query = $input['q'] ?? '';

@@ -3,12 +3,16 @@ const availabilityForm = document.querySelector("#availability-form");
 if (availabilityForm) {
     const status = document.querySelector("#availability-status");
     const times = document.querySelector("#available-times");
+    const staff = availabilityForm.elements.staff_id;
+    const date = availabilityForm.elements.date;
+    const confirmBooking = document.querySelector("#confirm-booking");
     let activeRequest;
 
     async function loadAvailability() {
         activeRequest?.abort();
         times.replaceChildren();
-        if (!availabilityForm.checkValidity()) {
+        if (confirmBooking) confirmBooking.disabled = true;
+        if (!staff.validity.valid || !date.validity.valid) {
             status.textContent = "Choose a specialist and a valid date.";
             return;
         }
@@ -16,8 +20,12 @@ if (availabilityForm) {
         activeRequest = new AbortController();
         const { signal } = activeRequest;
         status.textContent = "Checking available times…";
-        const url = new URL(availabilityForm.action);
-        url.search = new URLSearchParams(new FormData(availabilityForm));
+        const url = new URL(availabilityForm.dataset.timesUrl, document.baseURI);
+        url.search = new URLSearchParams({
+            service_id: availabilityForm.elements.service_id.value,
+            staff_id: staff.value,
+            date: date.value
+        });
         try {
             const response = await fetch(url, { signal });
             const data = await response.json();
@@ -28,7 +36,18 @@ if (availabilityForm) {
             }
             for (const time of data.times) {
                 const item = document.createElement("li");
-                item.textContent = time;
+                if (confirmBooking) {
+                    const radio = document.createElement("input");
+                    radio.type = "radio";
+                    radio.name = "start_time";
+                    radio.value = time;
+                    radio.required = true;
+                    const label = document.createElement("label");
+                    label.append(radio, time);
+                    item.append(label);
+                } else {
+                    item.textContent = time;
+                }
                 times.append(item);
             }
             status.textContent = data.times.length
@@ -41,10 +60,19 @@ if (availabilityForm) {
         }
     }
 
-    availabilityForm.addEventListener("change", loadAvailability);
-    availabilityForm.addEventListener("submit", event => {
-        event.preventDefault();
-        loadAvailability();
+    staff.addEventListener("change", loadAvailability);
+    date.addEventListener("change", loadAvailability);
+    document.querySelector("#check-times").addEventListener("click", loadAvailability);
+    if (confirmBooking) {
+        times.addEventListener("change", () => { confirmBooking.disabled = false; });
+    } else {
+        availabilityForm.addEventListener("submit", event => {
+            event.preventDefault();
+            loadAvailability();
+        });
+    }
+    window.addEventListener("pageshow", event => {
+        if (event.persisted) loadAvailability();
     });
     availabilityForm.hidden = false;
     loadAvailability();

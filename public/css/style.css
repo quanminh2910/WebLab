@@ -105,6 +105,8 @@ h5,
 }
 
 .btn-primary {
+    --bs-btn-disabled-bg: var(--spa-primary);
+    --bs-btn-disabled-border-color: var(--spa-primary);
     border-color: var(--spa-primary);
     background-color: var(--spa-primary);
 }
@@ -308,6 +310,27 @@ h5,
     border: 1px solid var(--spa-accent);
     border-radius: 0.4rem;
     font-variant-numeric: tabular-nums;
+}
+
+.availability-times li:has(label) {
+    padding: 0;
+}
+
+.availability-times label {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.35rem 0.65rem;
+    cursor: pointer;
+}
+
+.availability-times input {
+    accent-color: var(--spa-primary);
+}
+
+.availability-times li:has(:checked) {
+    border-color: var(--spa-primary);
+    font-weight: 600;
 }
 
 [data-theme="dark"] #availability-form :is(select, input) {

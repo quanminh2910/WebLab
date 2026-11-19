@@ -7,6 +7,25 @@ function spaLocalNow(): DateTimeImmutable
     return new DateTimeImmutable('now', new DateTimeZone('Asia/Ho_Chi_Minh'));
 }
 
+function availabilitySelection(array $input, DateTimeImmutable $now): array
+{
+    $idOptions = ['options' => ['min_range' => 1, 'max_range' => 4294967295]];
+    $serviceId = filter_var($input['service_id'] ?? null, FILTER_VALIDATE_INT, $idOptions);
+    $staffId = filter_var($input['staff_id'] ?? null, FILTER_VALIDATE_INT, $idOptions);
+    if (!$serviceId || !$staffId) {
+        throw new InvalidArgumentException('Choose a service and a specialist.');
+    }
+    $date = $input['date'] ?? '';
+    if (!is_string($date) || !preg_match('/\A[0-9]{4}-[0-9]{2}-[0-9]{2}\z/', $date)) {
+        throw new InvalidArgumentException('Choose a valid date.');
+    }
+    $day = DateTimeImmutable::createFromFormat('!Y-m-d', $date, $now->getTimezone());
+    if (!$day || $day->format('Y-m-d') !== $date || $date < $now->format('Y-m-d')) {
+        throw new InvalidArgumentException('Choose today or a future date.');
+    }
+    return [$serviceId, $staffId, $day];
+}
+
 function specialistsForService(int $serviceId): array
 {
     $statement = databaseConnection()->prepare(
@@ -19,6 +38,12 @@ function specialistsForService(int $serviceId): array
 }
 
 function availableStartTimes(int $serviceId, int $staffId, DateTimeImmutable $day, DateTimeImmutable $now): array
+{
+    return array_keys(availableSlotEnds($serviceId, $staffId, $day, $now));
+}
+
+// Each selectable start maps to the end time accounting for the full treatment.
+function availableSlotEnds(int $serviceId, int $staffId, DateTimeImmutable $day, DateTimeImmutable $now): array
 {
     $db = databaseConnection();
     $shift = $db->prepare(
@@ -62,7 +87,7 @@ function availableStartTimes(int $serviceId, int $staffId, DateTimeImmutable $da
                 continue 2;
             }
         }
-        $times[] = $start->format('H:i');
+        $times[$start->format('H:i')] = $endsAt;
     }
     return $times;
 }

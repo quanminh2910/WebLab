@@ -59,10 +59,11 @@ require __DIR__ . '/../components/management_header.php';
                 <p>Service management is available when you open this website on the server computer.</p>
             <?php endif; ?>
         <?php else: ?>
-            <p>You can explore services and view your account. Service management is reserved for administrators.</p>
+            <p>You can explore services, book appointments, and cancel your upcoming visits.</p>
         <?php endif; ?>
         <div class="management-actions mt-4">
             <a href="index.php#items" class="btn btn-primary">Explore Services</a>
+            <a href="my_appointments.php" class="btn btn-outline-primary">My Appointments</a>
             <?php if ($authenticatedUser['role'] === 'admin' && isLocalRequest()): ?><a href="manage_services.php" class="btn btn-outline-primary">Manage Services</a><?php endif; ?>
             <form method="post" action="logout.php" class="m-0">
                 <input type="hidden" name="csrf_token" value="<?= escapeHtml($token) ?>">
