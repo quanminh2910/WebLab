@@ -9,21 +9,27 @@ try {
     exit('The website is temporarily unavailable. Please try again shortly.');
 }
 
+$catalog = [];
 $services = [];
 $categories = [];
 $featuredService = null;
 $catalogError = null;
 
 try {
-    $services = fetchServices();
+    [$query, $selectedCategory] = serviceSearchCriteria($_GET);
+    $catalog = fetchServices();
     $categories = fetchCategories();
+    $services = $query === '' && $selectedCategory === 'all' ? $catalog : fetchServices($query, $selectedCategory);
 
-    foreach ($services as $service) {
+    foreach ($catalog as $service) {
         if ((int) $service['is_featured'] === 1) {
             $featuredService = $service;
             break;
         }
     }
+} catch (InvalidArgumentException $error) {
+    http_response_code(400);
+    $catalogError = $error->getMessage();
 } catch (PDOException $error) {
     error_log('Spa catalog database error: ' . $error->getMessage());
     http_response_code(503);
@@ -97,11 +103,11 @@ try {
 
                 <?php if ($catalogError !== null): ?>
                     <p class="text-center py-4" role="alert"><?= escapeHtml($catalogError) ?></p>
-                <?php elseif ($services === []): ?>
+                <?php elseif ($catalog === []): ?>
                     <p class="text-center py-4">No services are available yet. Please check back soon.</p>
                 <?php else: ?>
                     <div class="catalog-controls mx-auto mb-4">
-                        <form id="service-search" class="d-flex" role="search">
+                        <form id="service-search" class="d-flex" role="search" method="get" action="index.php#items">
                             <label class="visually-hidden" for="service-search-input">
                                 Search spa services
                             </label>
@@ -109,11 +115,15 @@ try {
                                 id="service-search-input"
                                 class="form-control me-2"
                                 type="search"
+                                name="q"
+                                value="<?= escapeHtml($query) ?>"
+                                maxlength="150"
                                 placeholder="Search services"
                                 autocomplete="off"
                                 aria-describedby="search-status"
+                                aria-controls="service-results"
                             >
-                            <button class="btn btn-outline-primary" type="submit">Search</button>
+                            <button class="btn btn-outline-primary" type="submit" name="category" value="<?= escapeHtml($selectedCategory) ?>">Search</button>
                         </form>
 
                         <div
@@ -122,19 +132,19 @@ try {
                             aria-label="Filter services by category"
                         >
                             <button
-                                type="button"
-                                class="category-filter btn btn-sm btn-outline-secondary active"
+                                type="submit" form="service-search" name="category" value="all"
+                                class="category-filter btn btn-sm btn-outline-secondary<?= $selectedCategory === 'all' ? ' active' : '' ?>"
                                 data-category="all"
-                                aria-pressed="true"
+                                aria-pressed="<?= $selectedCategory === 'all' ? 'true' : 'false' ?>"
                             >
                                 All
                             </button>
                             <?php foreach ($categories as $category): ?>
                                 <button
-                                    type="button"
-                                    class="category-filter btn btn-sm btn-outline-secondary"
+                                    type="submit" form="service-search" name="category" value="<?= escapeHtml($category['slug']) ?>"
+                                    class="category-filter btn btn-sm btn-outline-secondary<?= $selectedCategory === $category['slug'] ? ' active' : '' ?>"
                                     data-category="<?= escapeHtml($category['slug']) ?>"
-                                    aria-pressed="false"
+                                    aria-pressed="<?= $selectedCategory === $category['slug'] ? 'true' : 'false' ?>"
                                 >
                                     <?= escapeHtml($category['name']) ?>
                                 </button>
@@ -142,53 +152,18 @@ try {
                         </div>
 
                         <p id="search-status" class="search-status text-center mt-3 mb-0" aria-live="polite">
-                            <?= count($services) === 1 ? 'Showing 1 service.' : 'Showing all ' . count($services) . ' services.' ?>
+                            <?= match (count($services)) {
+                                0 => 'No services match your search.',
+                                1 => 'Showing 1 service.',
+                                default => 'Showing ' . count($services) . ' services.',
+                            } ?>
                         </p>
                     </div>
 
                     <p id="favorite-status" class="favorite-status" aria-live="polite" hidden></p>
 
-                    <div class="row g-4">
-                        <?php foreach ($services as $service): ?>
-                            <?php
-                            // Keep the existing browser favorite keys, including "and" for "&".
-                            $favoriteName = str_replace('&', 'and', $service['name']);
-                            ?>
-                            <div
-                                class="service-card col-12 col-md-6 col-lg-4"
-                                data-category="<?= escapeHtml($service['category_slug']) ?>"
-                            >
-                                <div class="card h-100">
-                                    <button
-                                        type="button"
-                                        class="favorite-button"
-                                        data-service="<?= escapeHtml($favoriteName) ?>"
-                                        aria-pressed="false"
-                                        aria-label="Add <?= escapeHtml($favoriteName) ?> to favorites"
-                                    >
-                                        <span aria-hidden="true">&#9825;</span>
-                                    </button>
-                                    <img
-                                        src="images/<?= escapeHtml(rawurlencode(basename($service['image']))) ?>"
-                                        class="card-img-top"
-                                        alt="<?= escapeHtml($service['name']) ?>"
-                                    >
-                                    <div class="card-body d-flex flex-column">
-                                        <h3 class="card-title h5"><?= escapeHtml($service['name']) ?></h3>
-                                        <p class="card-text"><?= escapeHtml($service['short_description']) ?></p>
-                                        <p class="text-muted mb-2">Duration: <?= escapeHtml(formatServiceDuration($service)) ?></p>
-                                        <p class="fw-bold"><?= escapeHtml(formatServicePrice($service)) ?></p>
-                                        <a
-                                            href="../pages/item_details.php?service=<?= escapeHtml(rawurlencode($service['slug'])) ?>"
-                                            class="btn btn-primary mt-auto"
-                                            aria-label="View details for <?= escapeHtml($service['name']) ?>"
-                                        >
-                                            View Details
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        <?php endforeach; ?>
+                    <div id="service-results" class="row g-4" aria-busy="false">
+                        <?php require __DIR__ . '/../components/service_cards.php'; ?>
                     </div>
                 <?php endif; ?>
             </div>

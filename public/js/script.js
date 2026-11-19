@@ -101,12 +101,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const searchInput = document.querySelector("#service-search-input");
     const categoryButtons = document.querySelectorAll(".category-filter");
-    const serviceCards = Array.from(document.querySelectorAll(".service-card"));
+    const results = document.querySelector("#service-results");
+    const searchButton = searchForm.querySelector("button[type=submit]");
     const searchStatus = document.querySelector("#search-status");
-    const favoriteButtons = document.querySelectorAll(".favorite-button");
     const favoriteStatus = document.querySelector("#favorite-status");
     let favoriteMessageTimer;
-    let selectedCategory = "all";
+    let searchTimer;
+    let activeSearch;
     let favoriteServices = new Set();
 
     try {
@@ -119,51 +120,47 @@ document.addEventListener("DOMContentLoaded", function () {
         favoriteServices = new Set();
     }
 
-    function filterServices() {
-        const query = searchInput.value.trim().toLocaleLowerCase();
-        let visibleCount = 0;
+    async function loadServices(signal) {
+        const criteria = new URLSearchParams({ q: searchInput.value.trim(), category: searchButton.value });
+        try {
+            const response = await fetch(`search_services.php?${criteria}`, { signal });
+            if (!response.ok) throw new Error("Search request failed");
+            const cards = await response.text();
+            if (signal.aborted) return;
 
-        serviceCards.forEach(function (card) {
-            const matchesSearch = card.textContent.toLocaleLowerCase().includes(query);
-            const matchesCategory = selectedCategory === "all"
-                || card.dataset.category === selectedCategory;
-            const shouldShow = matchesSearch && matchesCategory;
-
-            card.hidden = !shouldShow;
-
-            if (shouldShow) {
-                visibleCount += 1;
-            }
-        });
-
-        if (visibleCount === 0) {
-            searchStatus.textContent = "No services match your search.";
-        } else if (visibleCount === 1) {
-            searchStatus.textContent = "Showing 1 service.";
-        } else {
-            searchStatus.textContent = `Showing ${visibleCount} services.`;
+            // PHP renders these cards with the same escaped template as the initial catalog.
+            results.innerHTML = cards;
+            restoreFavoriteButtons();
+            const count = results.childElementCount;
+            searchStatus.textContent = count === 0 ? "No services match your search."
+                : `Showing ${count} service${count === 1 ? "" : "s"}.`;
+        } catch (error) {
+            if (signal.aborted) return;
+            results.replaceChildren();
+            searchStatus.textContent = "We couldn't load the services. Select Search to try again.";
         }
+        results.setAttribute("aria-busy", "false");
     }
 
+    function scheduleSearch(delay) {
+        window.clearTimeout(searchTimer);
+        activeSearch?.abort();
+        activeSearch = new AbortController();
+        results.setAttribute("aria-busy", "true");
+        searchStatus.textContent = "Searching…";
+        searchTimer = window.setTimeout(loadServices, delay, activeSearch.signal);
+    }
+
+    searchInput.addEventListener("input", () => scheduleSearch(200));
     searchForm.addEventListener("submit", function (event) {
         event.preventDefault();
-        filterServices();
-    });
-
-    searchInput.addEventListener("input", filterServices);
-
-    categoryButtons.forEach(function (button) {
-        button.addEventListener("click", function () {
-            selectedCategory = button.dataset.category;
-
-            categoryButtons.forEach(function (categoryButton) {
-                const isSelected = categoryButton === button;
-                categoryButton.classList.toggle("active", isSelected);
-                categoryButton.setAttribute("aria-pressed", String(isSelected));
-            });
-
-            filterServices();
+        if (event.submitter) searchButton.value = event.submitter.value;
+        categoryButtons.forEach(function (button) {
+            const selected = button.value === searchButton.value;
+            button.classList.toggle("active", selected);
+            button.setAttribute("aria-pressed", String(selected));
         });
+        scheduleSearch(0);
     });
 
     function updateFavoriteButton(button, isFavorite) {
@@ -178,32 +175,34 @@ document.addEventListener("DOMContentLoaded", function () {
         icon.textContent = isFavorite ? "♥" : "♡";
     }
 
-    favoriteButtons.forEach(function (button) {
-        const serviceName = button.dataset.service;
-
-        updateFavoriteButton(button, favoriteServices.has(serviceName));
-
-        button.addEventListener("click", function () {
-            const isFavorite = !favoriteServices.has(serviceName);
-
-            if (isFavorite) {
-                favoriteServices.add(serviceName);
-            } else {
-                favoriteServices.delete(serviceName);
-            }
-
-            updateFavoriteButton(button, isFavorite);
-            setStoredValue("spa-favorites", JSON.stringify(Array.from(favoriteServices)));
-
-            favoriteStatus.textContent = isFavorite
-                ? `${serviceName} added to favorites.`
-                : `${serviceName} removed from favorites.`;
-            favoriteStatus.hidden = false;
-
-            window.clearTimeout(favoriteMessageTimer);
-            favoriteMessageTimer = window.setTimeout(function () {
-                favoriteStatus.hidden = true;
-            }, 2500);
+    function restoreFavoriteButtons() {
+        results.querySelectorAll(".favorite-button").forEach(function (button) {
+            updateFavoriteButton(button, favoriteServices.has(button.dataset.service));
         });
+    }
+    restoreFavoriteButtons();
+
+    // Listen on the grid so a newly returned card can be favorited immediately.
+    results.addEventListener("click", function (event) {
+        const button = event.target.closest(".favorite-button");
+        if (!button) return;
+        const serviceName = button.dataset.service;
+        const isFavorite = !favoriteServices.has(serviceName);
+
+        if (isFavorite) {
+            favoriteServices.add(serviceName);
+        } else {
+            favoriteServices.delete(serviceName);
+        }
+        updateFavoriteButton(button, isFavorite);
+        setStoredValue("spa-favorites", JSON.stringify(Array.from(favoriteServices)));
+        favoriteStatus.textContent = isFavorite
+            ? `${serviceName} added to favorites.`
+            : `${serviceName} removed from favorites.`;
+        favoriteStatus.hidden = false;
+        window.clearTimeout(favoriteMessageTimer);
+        favoriteMessageTimer = window.setTimeout(function () {
+            favoriteStatus.hidden = true;
+        }, 2500);
     });
 });

@@ -2,14 +2,45 @@
 
 require_once __DIR__ . '/database.php';
 
-function fetchServices(): array
+function serviceSearchCriteria(array $input): array
 {
-    $statement = databaseConnection()->query(
-        'SELECT s.*, c.name AS category_name, c.slug AS category_slug
-         FROM services AS s
-         INNER JOIN categories AS c ON c.id = s.category_id
-         ORDER BY s.id'
-    );
+    $query = $input['q'] ?? '';
+    $category = $input['category'] ?? 'all';
+    if (!is_string($query) || !is_string($category)
+        || !mb_check_encoding([$query, $category], 'UTF-8')
+        || mb_strlen($query, 'UTF-8') > 150 || mb_strlen($category, 'UTF-8') > 100) {
+        throw new InvalidArgumentException('Please enter a valid search term and category.');
+    }
+
+    $category = trim($category);
+    return [trim($query), $category === '' ? 'all' : $category];
+}
+
+function fetchServices(string $query = '', string $category = 'all'): array
+{
+    $sql = 'SELECT s.*, c.name AS category_name, c.slug AS category_slug
+            FROM services AS s INNER JOIN categories AS c ON c.id = s.category_id';
+    $conditions = [];
+    $parameters = [];
+
+    if ($query !== '') {
+        // Match literal text (including % and _) against the catalog fields visitors can see.
+        $conditions[] = "LOCATE(:query, CONCAT_WS(' ',
+            s.name, s.short_description, c.name, CONCAT(FORMAT(s.price, 0), ' VND'), s.price,
+            CASE WHEN s.duration_min_minutes = s.duration_max_minutes THEN s.duration_min_minutes
+                 ELSE CONCAT(s.duration_min_minutes, '–', s.duration_max_minutes) END, 'min'
+        )) > 0";
+        $parameters['query'] = $query;
+    }
+    if ($category !== 'all') {
+        $conditions[] = 'c.slug = :category';
+        $parameters['category'] = $category;
+    }
+    if ($conditions !== []) {
+        $sql .= ' WHERE ' . implode(' AND ', $conditions);
+    }
+    $statement = databaseConnection()->prepare($sql . ' ORDER BY s.id');
+    $statement->execute($parameters);
 
     return $statement->fetchAll();
 }
