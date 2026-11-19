@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../auth/session.php';
 require_once __DIR__ . '/../includes/availability.php';
 
 header('Content-Type: application/json; charset=utf-8');
@@ -13,11 +14,12 @@ if (!in_array($_SERVER['REQUEST_METHOD'], ['GET', 'HEAD'], true)) {
 try {
     $now = spaLocalNow();
     [$serviceId, $staffId, $day] = availabilitySelection($_GET, $now);
+    refreshExistingSpaSession();
     echo json_encode(['times' => availableStartTimes($serviceId, $staffId, $day, $now)]);
 } catch (InvalidArgumentException $error) {
     http_response_code(400);
     echo json_encode(['error' => $error->getMessage()]);
-} catch (PDOException $error) {
+} catch (RuntimeException $error) {
     error_log('Availability lookup failed: ' . $error->getMessage());
     http_response_code(503);
     echo json_encode(['error' => 'Available times could not be loaded. Please try again.']);

@@ -123,11 +123,8 @@ function findUserByEmail(string $email): ?array
     return $user === false ? null : $user;
 }
 
-function createUser(array $values, string $password, string $role = 'customer'): int
+function hashUserPassword(string $password): string
 {
-    if (!in_array($role, ['admin', 'customer'], true)) {
-        throw new RuntimeException('An invalid account role was supplied.');
-    }
     if (str_contains($password, "\0")) {
         throw new RuntimeException('A password must not contain null characters.');
     }
@@ -140,7 +137,14 @@ function createUser(array $values, string $password, string $role = 'customer'):
     if ($hash === false) {
         throw new RuntimeException('The password could not be secured. Please try again.');
     }
+    return $hash;
+}
 
+function createUser(array $values, string $password, string $role = 'customer'): int
+{
+    if (!in_array($role, ['admin', 'customer'], true)) {
+        throw new RuntimeException('An invalid account role was supplied.');
+    }
     $statement = databaseConnection()->prepare(
         'INSERT INTO users (full_name, email, password_hash, role)
          VALUES (:full_name, :email, :password_hash, :role)'
@@ -148,11 +152,42 @@ function createUser(array $values, string $password, string $role = 'customer'):
     $statement->execute([
         'full_name' => $values['full_name'],
         'email' => $values['email'],
-        'password_hash' => $hash,
+        'password_hash' => hashUserPassword($password),
         'role' => $role,
     ]);
 
     return (int) databaseConnection()->lastInsertId();
+}
+
+function authenticateUser(string $email, string $password): ?array
+{
+    $user = findUserByEmail($email);
+    // Verify a dummy hash too, so an unknown email still goes through password verification.
+    $hash = $user['password_hash'] ?? '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi';
+    if (!password_verify($password, $hash) || $user === null) {
+        return null;
+    }
+
+    $hashInfo = password_get_info($hash);
+    // Keep higher-cost hashes and other algorithms if this PHP installation defaults to bcrypt.
+    $canUpgrade = PASSWORD_DEFAULT !== PASSWORD_BCRYPT
+        || ($hashInfo['algo'] === PASSWORD_BCRYPT && $hashInfo['options']['cost'] < PASSWORD_BCRYPT_DEFAULT_COST);
+    if ($canUpgrade && password_needs_rehash($hash, PASSWORD_DEFAULT)) {
+        // Another login or a password change may have updated this row since we read it.
+        $update = databaseConnection()->prepare(
+            'UPDATE users SET password_hash = ? WHERE id = ? AND BINARY password_hash = ?'
+        );
+        $update->execute([hashUserPassword($password), $user['id'], $hash]);
+        if ($update->rowCount() === 0) {
+            $latest = findUserByEmail($email);
+            if ($latest === null || $latest['id'] !== $user['id'] || !password_verify($password, $latest['password_hash'])) {
+                return null;
+            }
+            $user = $latest;
+        }
+    }
+    unset($user['password_hash']);
+    return $user;
 }
 
 function beginAuthenticatedSession(array $user): void
@@ -168,8 +203,8 @@ function beginAuthenticatedSession(array $user): void
         throw new RuntimeException('A secure login session could not be created. Please try again.');
     }
 
-    // Drop pre-login tokens and messages; only the account id identifies the user.
-    $_SESSION = ['user_id' => $id];
+    // Start the authenticated session with a fresh token on the next form.
+    $_SESSION = ['user_id' => $id, 'last_activity' => time()];
 }
 
 function endAuthenticatedSession(): void

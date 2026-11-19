@@ -47,11 +47,8 @@ try {
                 if ($errors !== []) {
                     http_response_code(422);
                 } else {
-                    $user = findUserByEmail($email);
-                    // The dummy hash keeps unknown-email password verification comparable.
-                    $hash = $user['password_hash'] ?? '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi';
-                    $passwordMatches = password_verify($password, $hash);
-                    if ($user === null || !$passwordMatches) {
+                    $user = authenticateUser($email, $password);
+                    if ($user === null) {
                         http_response_code(401);
                         $errorMessage = 'Invalid email or password.';
                     } else {
@@ -81,7 +78,7 @@ require __DIR__ . '/../components/management_header.php';
 <section class="auth-panel management-panel mx-auto" aria-labelledby="login-heading">
     <h1 id="login-heading">Log In</h1>
     <p class="text-muted">Welcome back to Spa &amp; Beauty Center.</p>
-    <?php if ($flashMessage !== null): ?><div class="alert alert-success" role="status"><?= escapeHtml($flashMessage) ?></div><?php endif; ?>
+    <?php if ($flashMessage !== null): ?><div class="alert alert-info" role="status"><?= escapeHtml($flashMessage) ?></div><?php endif; ?>
     <?php if ($errorMessage !== null): ?><div class="alert alert-danger" role="alert"><?= escapeHtml($errorMessage) ?></div><?php endif; ?>
     <?php if ($errors !== []): ?><div class="alert alert-danger" role="alert">Please correct the highlighted fields.</div><?php endif; ?>
     <?php if ($token !== null): ?>
