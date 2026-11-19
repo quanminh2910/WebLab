@@ -295,6 +295,27 @@ h5,
     object-fit: cover;
 }
 
+.availability-times {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    padding: 0;
+    list-style: none;
+}
+
+.availability-times li {
+    padding: 0.2rem 0.6rem;
+    border: 1px solid var(--spa-accent);
+    border-radius: 0.4rem;
+    font-variant-numeric: tabular-nums;
+}
+
+[data-theme="dark"] #availability-form :is(select, input) {
+    color-scheme: dark;
+    background-color: var(--spa-surface);
+    color: var(--spa-text);
+}
+
 .detail-price {
     color: var(--spa-primary-dark);
     font-weight: 700;

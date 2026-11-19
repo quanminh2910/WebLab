@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../auth/auth.php';
 require_once __DIR__ . '/../includes/preferences.php';
+require_once __DIR__ . '/../includes/availability.php';
 try {
     startSpaSession();
 } catch (RuntimeException $error) {
@@ -36,6 +37,16 @@ if (!is_string($serviceKey) || strlen($serviceKey) > 150
     }
 }
 
+$specialists = [];
+$availabilityError = null;
+if ($service !== null) {
+    try {
+        $specialists = specialistsForService((int) $service['id']);
+    } catch (PDOException $error) {
+        error_log('Service specialist lookup failed: ' . $error->getMessage());
+        $availabilityError = 'Availability is temporarily unavailable. Please try again later.';
+    }
+}
 $pageTitle = $service !== null ? $service['name'] : $errorTitle;
 ?>
 <!DOCTYPE html>
@@ -76,14 +87,39 @@ $pageTitle = $service !== null ? $service['name'] : $errorTitle;
                         <?= escapeHtml(formatServicePrice($service)) ?>
                     </p>
                     <p><?= escapeHtml($service['description']) ?></p>
+                    <section id="availability" class="mt-4" aria-labelledby="availability-title">
+                        <h2 id="availability-title" class="h4">Check availability</h2>
+                        <?php if ($availabilityError !== null): ?>
+                            <p role="alert"><?= escapeHtml($availabilityError) ?></p>
+                        <?php elseif (!$specialists): ?>
+                            <p>There are currently no specialists assigned to this service.</p>
+                        <?php else: ?>
+                            <form id="availability-form" action="../public/available_times.php" method="get" hidden>
+                                <input type="hidden" name="service_id" value="<?= (int) $service['id'] ?>">
+                                <div class="row g-2">
+                                    <div class="col-sm-6">
+                                        <label for="staff-choice" class="form-label">Specialist</label>
+                                        <select id="staff-choice" class="form-select" name="staff_id" required>
+                                            <?php foreach ($specialists as $specialist): ?>
+                                                <option value="<?= (int) $specialist['id'] ?>"><?= escapeHtml($specialist['name']) ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <label for="visit-date" class="form-label">Date</label>
+                                        <?php $today = spaLocalNow()->format('Y-m-d'); ?>
+                                        <input id="visit-date" class="form-control" type="date" name="date"
+                                               min="<?= $today ?>" value="<?= $today ?>" required>
+                                    </div>
+                                </div>
+                                <button class="btn btn-primary mt-3" type="submit">Check times</button>
+                            </form>
+                            <noscript><p>Enable JavaScript to check available times.</p></noscript>
+                            <p id="availability-status" class="mt-3 mb-2" role="status"></p>
+                            <ul id="available-times" class="availability-times" aria-label="Available start times in Ho Chi Minh City"></ul>
+                        <?php endif; ?>
+                    </section>
                     <div class="d-flex flex-wrap gap-2 mt-4">
-                        <button
-                            type="button"
-                            class="btn btn-primary"
-                            onclick="showMessage()"
-                        >
-                            Book This Service
-                        </button>
                         <a href="../public/index.php#items" class="btn btn-outline-secondary">
                             Back to Services
                         </a>
@@ -107,5 +143,6 @@ $pageTitle = $service !== null ? $service['name'] : $errorTitle;
         src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
     ></script>
     <script src="../public/js/script.js"></script>
+    <script src="../public/js/availability.js"></script>
 </body>
 </html>

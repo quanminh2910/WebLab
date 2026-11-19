@@ -1,4 +1,4 @@
--- Lab 2, Task 1: Spa & Beauty Center database and initial service catalog.
+-- Spa & Beauty Center: Lab 2 catalog and Lab 3 specialist availability.
 -- No tables are dropped. Re-importing leaves existing rows unchanged.
 
 CREATE DATABASE IF NOT EXISTS spa_beauty_center
@@ -114,5 +114,105 @@ INSERT INTO services (
         590000, 60, 60, 'aroma.jpg', 0
     )
 ON DUPLICATE KEY UPDATE slug = VALUES(slug);
+
+COMMIT;
+
+-- Lab 3, Task 2: specialist availability.
+-- Specialist profiles are independent of customer and administrator login accounts.
+CREATE TABLE IF NOT EXISTS staff (
+    id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    name VARCHAR(100) NOT NULL,
+    specialization VARCHAR(100) NOT NULL,
+    biography TEXT NOT NULL,
+    photo VARCHAR(255) NOT NULL DEFAULT 'default-portrait.svg',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS staff_services (
+    staff_id INT UNSIGNED NOT NULL,
+    service_id INT UNSIGNED NOT NULL,
+    PRIMARY KEY (staff_id, service_id),
+    KEY idx_staff_services_service_id (service_id),
+    CONSTRAINT fk_staff_services_staff FOREIGN KEY (staff_id)
+        REFERENCES staff (id) ON UPDATE CASCADE ON DELETE CASCADE,
+    CONSTRAINT fk_staff_services_service FOREIGN KEY (service_id)
+        REFERENCES services (id) ON UPDATE CASCADE ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- One local working interval per specialist per weekday (Monday = 1).
+CREATE TABLE IF NOT EXISTS staff_hours (
+    staff_id INT UNSIGNED NOT NULL,
+    weekday_number TINYINT UNSIGNED NOT NULL,
+    opens_at TIME NOT NULL,
+    closes_at TIME NOT NULL,
+    PRIMARY KEY (staff_id, weekday_number),
+    FOREIGN KEY (staff_id) REFERENCES staff (id) ON DELETE CASCADE,
+    CHECK (weekday_number BETWEEN 1 AND 7 AND opens_at < closes_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Appointment times use the spa's local time in Ho Chi Minh City.
+CREATE TABLE IF NOT EXISTS appointments (
+    id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    user_id INT UNSIGNED NOT NULL,
+    staff_id INT UNSIGNED NOT NULL,
+    service_id INT UNSIGNED NOT NULL,
+    starts_at DATETIME NOT NULL,
+    ends_at DATETIME NOT NULL,
+    status ENUM('booked','cancelled') NOT NULL DEFAULT 'booked',
+    KEY idx_appointments_staff_start (staff_id, starts_at),
+    FOREIGN KEY (user_id) REFERENCES users (id),
+    FOREIGN KEY (staff_id) REFERENCES staff (id),
+    FOREIGN KEY (service_id) REFERENCES services (id),
+    CHECK (starts_at < ends_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+START TRANSACTION;
+
+-- Only newly inserted sample profiles receive sample assignments.
+-- Re-importing preserves changes to existing profiles and their chosen services.
+SET @seed_staff_massage = NOT EXISTS (SELECT 1 FROM staff WHERE id = 1);
+SET @seed_staff_facial = NOT EXISTS (SELECT 1 FROM staff WHERE id = 2);
+SET @seed_staff_wellness = NOT EXISTS (SELECT 1 FROM staff WHERE id = 3);
+SET @seed_staff_nails = NOT EXISTS (SELECT 1 FROM staff WHERE id = 4);
+
+-- These four profiles are fictional examples for the assignment.
+INSERT INTO staff (id, name, specialization, biography, photo) VALUES
+    (1, 'Mai Nguyen', 'Massage Specialist',
+     'Mai focuses on relaxing full-body massage and targeted work for tired muscles. She adjusts the pressure to help each guest feel comfortable throughout the treatment.',
+     'default-portrait.svg'),
+    (2, 'Linh Tran', 'Facial Treatment Specialist',
+     'Linh enjoys helping guests build simple skincare habits. Her facial treatments focus on gentle cleansing, hydration, and a refreshed complexion.',
+     'default-portrait.svg'),
+    (3, 'An Pham', 'Wellness Therapist',
+     'An offers calming treatments with heated stones and aromatic oils. She creates a quiet, welcoming space for guests to unwind.',
+     'default-portrait.svg'),
+    (4, 'Vy Le', 'Nail Care Specialist',
+     'Vy provides careful nail shaping, cuticle care, and regular polish finishes. She helps guests choose colors that suit their everyday style.',
+     'default-portrait.svg')
+ON DUPLICATE KEY UPDATE id = VALUES(id);
+
+INSERT INTO staff_services (staff_id, service_id)
+SELECT st.id, s.id
+FROM staff AS st
+INNER JOIN services AS s ON
+    (st.id = 1 AND @seed_staff_massage AND s.slug IN ('swedish-massage', 'deep-tissue-massage'))
+    OR (st.id = 2 AND @seed_staff_facial AND s.slug = 'radiance-facial')
+    OR (st.id = 3 AND @seed_staff_wellness AND s.slug IN ('swedish-massage', 'hot-stone-therapy', 'aromatherapy'))
+    OR (st.id = 4 AND @seed_staff_nails AND s.slug = 'manicure-pedicure');
+
+-- Sample weekly shifts. An omitted weekday is a day off.
+INSERT INTO staff_hours (staff_id, weekday_number, opens_at, closes_at)
+SELECT st.id, days.weekday_number,
+       CASE WHEN st.id = 3 THEN '10:00' ELSE '09:00' END,
+       CASE st.id WHEN 2 THEN '16:00' WHEN 3 THEN '18:00' ELSE '17:00' END
+FROM staff AS st
+CROSS JOIN (SELECT 1 AS weekday_number UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL
+            SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7) AS days
+WHERE (st.id = 1 AND @seed_staff_massage AND days.weekday_number BETWEEN 1 AND 6)
+   OR (st.id = 2 AND @seed_staff_facial AND days.weekday_number BETWEEN 1 AND 5)
+   OR (st.id = 3 AND @seed_staff_wellness AND days.weekday_number BETWEEN 2 AND 6)
+   OR (st.id = 4 AND @seed_staff_nails AND days.weekday_number BETWEEN 3 AND 7);
 
 COMMIT;

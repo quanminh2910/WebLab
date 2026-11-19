@@ -1,7 +1,3 @@
-function showMessage() {
-    alert("Your spa service has been added to your booking request.");
-}
-
 function getStoredValue(key) {
     try {
         return window.localStorage.getItem(key);
