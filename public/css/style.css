@@ -28,6 +28,24 @@ main {
     flex: 1;
 }
 
+.service-card,
+.featured-content,
+main h1 {
+    overflow-wrap: anywhere;
+}
+
+.skip-link {
+    position: absolute;
+    top: 0.5rem;
+    left: 0.5rem;
+    z-index: 1100;
+    padding: 0.65rem 1rem;
+    border: 2px solid currentColor;
+    border-radius: 0.35rem;
+    background: #fff;
+    color: #49333f;
+}
+
 h1,
 h2,
 h3,
@@ -39,6 +57,7 @@ h5,
 }
 
 .navbar.bg-dark {
+    --bs-navbar-color: #eadfe4;
     background-color: var(--spa-heading) !important;
     box-shadow: 0 3px 16px rgb(73 51 63 / 18%);
 }
@@ -194,6 +213,11 @@ h5,
     max-width: 760px;
 }
 
+#service-search-input {
+    flex: 1;
+    min-width: 0;
+}
+
 .catalog-controls .form-control:focus {
     border-color: var(--spa-primary);
     box-shadow: 0 0 0 0.25rem rgb(138 88 112 / 20%);
@@ -331,6 +355,14 @@ h5,
 .availability-times li:has(:checked) {
     border-color: var(--spa-primary);
     font-weight: 600;
+}
+
+#visit-date[aria-invalid="true"] {
+    border: 2px solid #a42d43;
+}
+
+[data-theme="dark"] #visit-date[aria-invalid="true"] {
+    border-color: #f6a8b7;
 }
 
 [data-theme="dark"] #availability-form :is(select, input) {
@@ -471,6 +503,25 @@ h5,
 }
 
 @media (max-width: 575.98px) {
+    .navbar-brand {
+        gap: 0.45rem;
+        max-width: calc(100% - 4rem);
+        margin-right: 0.25rem;
+        font-size: 1.1rem;
+        white-space: normal;
+    }
+
+    .site-logo {
+        width: 40px;
+        height: 40px;
+    }
+
+    .catalog-controls .btn,
+    #availability-form :is(.form-control, .form-select, .btn),
+    .availability-times label {
+        min-height: 44px;
+    }
+
     .hero-section {
         padding: 4rem 0 !important;
     }

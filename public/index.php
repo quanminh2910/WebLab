@@ -43,7 +43,11 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spa &amp; Beauty Center</title>
+    <title>Massage, Facials &amp; Nail Care | Spa &amp; Beauty Center</title>
+    <meta name="description" content="Compare massage, facial, wellness, and nail treatments by price and duration. Choose a specialist and check appointment times at Spa &amp; Beauty Center.">
+    <?php if ($catalogError !== null || $query !== '' || $selectedCategory !== 'all'): ?>
+        <meta name="robots" content="noindex">
+    <?php endif; ?>
     <link
         href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
         rel="stylesheet"
@@ -53,12 +57,12 @@ try {
 <body>
     <?php require_once __DIR__ . '/../components/header.php'; ?>
 
-    <main>
+    <main id="main-content" tabindex="-1">
         <section class="hero-section py-5">
             <div class="container text-center">
-                <h1>Welcome to Our Spa &amp; Beauty Center</h1>
+                <h1>Spa treatments and beauty services</h1>
                 <p class="lead">
-                    Relax, refresh, and discover treatments designed to help you feel your best.
+                    Compare treatments by price and duration, then choose a specialist and time for your visit.
                 </p>
                 <a href="#items" class="btn btn-primary">
                     Explore Services
@@ -97,9 +101,9 @@ try {
             </section>
         <?php endif; ?>
 
-        <section id="items" class="py-5">
+        <section id="items" class="py-5" aria-labelledby="services-heading">
             <div class="container">
-                <h2 class="text-center mb-3">Explore Our Services</h2>
+                <h2 id="services-heading" class="text-center mb-3">Explore Our Services</h2>
 
                 <?php if ($catalogError !== null): ?>
                     <p class="text-center py-4" role="alert"><?= escapeHtml($catalogError) ?></p>
@@ -107,23 +111,23 @@ try {
                     <p class="text-center py-4">No services are available yet. Please check back soon.</p>
                 <?php else: ?>
                     <div class="catalog-controls mx-auto mb-4">
-                        <form id="service-search" class="d-flex" role="search" method="get" action="index.php#items">
-                            <label class="visually-hidden" for="service-search-input">
-                                Search spa services
-                            </label>
-                            <input
-                                id="service-search-input"
-                                class="form-control me-2"
-                                type="search"
-                                name="q"
-                                value="<?= escapeHtml($query) ?>"
-                                maxlength="150"
-                                placeholder="Search services"
-                                autocomplete="off"
-                                aria-describedby="search-status"
-                                aria-controls="service-results"
-                            >
-                            <button class="btn btn-outline-primary" type="submit" name="category" value="<?= escapeHtml($selectedCategory) ?>">Search</button>
+                        <form id="service-search" role="search" method="get" action="index.php#items">
+                            <label class="form-label fw-semibold" for="service-search-input">Search services</label>
+                            <div class="d-flex gap-2">
+                                <input
+                                    id="service-search-input"
+                                    class="form-control"
+                                    type="search"
+                                    name="q"
+                                    value="<?= escapeHtml($query) ?>"
+                                    maxlength="150"
+                                    placeholder="Try massage or facial"
+                                    autocomplete="off"
+                                    aria-describedby="search-status"
+                                    aria-controls="service-results"
+                                >
+                                <button class="btn btn-outline-primary" type="submit" name="category" value="<?= escapeHtml($selectedCategory) ?>">Search</button>
+                            </div>
                         </form>
 
                         <div
@@ -158,6 +162,9 @@ try {
                                 default => 'Showing ' . count($services) . ' services.',
                             } ?>
                         </p>
+                        <form id="search-recovery" method="get" action="index.php#items" class="text-center"<?= $services ? ' hidden' : '' ?>>
+                            <button class="btn btn-outline-secondary mt-2" type="submit">Clear search and filters</button>
+                        </form>
                     </div>
 
                     <p id="favorite-status" class="favorite-status" aria-live="polite" hidden></p>

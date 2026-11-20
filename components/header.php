@@ -12,12 +12,14 @@ if (array_key_exists('authenticatedUser', get_defined_vars())) {
 }
 $currentPage = basename($_SERVER['SCRIPT_NAME']);
 $isHomePage = $currentPage === 'index.php';
+$catalogHref = $isHomePage ? '' : '../public/index.php';
 $isItemPage = $currentPage === 'item_details.php';
 $isManagementPage = in_array($currentPage, ['manage_services.php', 'service_form.php', 'delete_service.php'], true);
 $isLocalVisitor = isLocalRequest();
 ?>
+<a class="skip-link visually-hidden-focusable" href="#main-content">Skip to main content</a>
 <header>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark" aria-label="Main navigation">
         <div class="container">
             <a class="navbar-brand" href="../public/index.php">
                 <img
@@ -56,19 +58,18 @@ $isLocalVisitor = isLocalRequest();
                     <li class="nav-item">
                         <a
                             class="nav-link<?= $isItemPage ? ' active' : '' ?>"
-                            <?= $isItemPage ? 'aria-current="page"' : '' ?>
-                            href="../public/index.php#items"
+                            href="<?= $catalogHref ?>#items"
                         >
-                            Items
+                            Services
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="../public/index.php#service-search">
+                        <a class="nav-link" href="<?= $catalogHref ?>#service-search-input">
                             Search
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="../public/index.php#contact">
+                        <a class="nav-link" href="#contact">
                             Contact
                         </a>
                     </li>

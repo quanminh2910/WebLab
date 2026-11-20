@@ -57,7 +57,7 @@ require __DIR__ . '/../components/management_header.php';
     <p class="alert alert-danger" role="alert"><?= escapeHtml($errorMessage) ?></p>
 <?php endif; ?>
 <?php if ($appointments): ?>
-    <div class="management-panel table-responsive">
+    <div class="management-panel table-responsive" role="region" aria-label="Your appointments" tabindex="0">
         <table class="table management-table">
             <caption class="visually-hidden">Your appointments and their booking status</caption>
             <thead><tr>

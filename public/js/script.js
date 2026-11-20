@@ -100,6 +100,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const results = document.querySelector("#service-results");
     const searchButton = searchForm.querySelector("button[type=submit]");
     const searchStatus = document.querySelector("#search-status");
+    const searchRecovery = document.querySelector("#search-recovery");
     const favoriteStatus = document.querySelector("#favorite-status");
     let favoriteMessageTimer;
     let searchTimer;
@@ -128,6 +129,7 @@ document.addEventListener("DOMContentLoaded", function () {
             results.innerHTML = cards;
             restoreFavoriteButtons();
             const count = results.childElementCount;
+            searchRecovery.hidden = count > 0;
             searchStatus.textContent = count === 0 ? "No services match your search."
                 : `Showing ${count} service${count === 1 ? "" : "s"}.`;
         } catch (error) {
@@ -142,12 +144,20 @@ document.addEventListener("DOMContentLoaded", function () {
         window.clearTimeout(searchTimer);
         activeSearch?.abort();
         activeSearch = new AbortController();
+        searchRecovery.hidden = true;
         results.setAttribute("aria-busy", "true");
         searchStatus.textContent = "Searching…";
         searchTimer = window.setTimeout(loadServices, delay, activeSearch.signal);
     }
 
     searchInput.addEventListener("input", () => scheduleSearch(200));
+    searchRecovery.addEventListener("submit", event => {
+        if (window.location.search) return; // A normal GET also clears filters stored in the URL.
+        event.preventDefault();
+        searchInput.value = "";
+        searchInput.focus();
+        searchForm.requestSubmit(document.querySelector('.category-filter[value="all"]'));
+    });
     searchForm.addEventListener("submit", function (event) {
         event.preventDefault();
         if (event.submitter) searchButton.value = event.submitter.value;

@@ -80,7 +80,12 @@
 
 .management-page .management-table > :not(caption) > * > * { padding: 0.85rem; }
 .management-page .management-table caption { color: var(--management-muted); }
-.management-page .table-responsive { border-radius: 0.5rem; }
+.management-page .table-responsive {
+    position: relative;
+    max-width: 100%;
+    overflow-x: auto;
+    border-radius: 0.5rem;
+}
 .management-page .management-confirmation {
     max-width: 760px;
     border-left: 4px solid #a32838;

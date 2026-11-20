@@ -3,7 +3,7 @@
     // Keep the existing browser favorite keys, including "and" for "&".
     $favoriteName = str_replace('&', 'and', $service['name']);
     ?>
-    <div class="service-card col-12 col-md-6 col-lg-4" data-category="<?= escapeHtml($service['category_slug']) ?>">
+    <article class="service-card col-12 col-md-6 col-lg-4" data-category="<?= escapeHtml($service['category_slug']) ?>">
         <div class="card h-100">
             <button type="button" class="favorite-button" data-service="<?= escapeHtml($favoriteName) ?>"
                     aria-pressed="false" aria-label="Add <?= escapeHtml($favoriteName) ?> to favorites">
@@ -17,10 +17,10 @@
                 <p class="text-muted mb-2">Duration: <?= escapeHtml(formatServiceDuration($service)) ?></p>
                 <p class="fw-bold"><?= escapeHtml(formatServicePrice($service)) ?></p>
                 <a href="../pages/item_details.php?service=<?= escapeHtml(rawurlencode($service['slug'])) ?>"
-                   class="btn btn-primary mt-auto" aria-label="View details for <?= escapeHtml($service['name']) ?>">
-                    View Details
+                   class="btn btn-primary mt-auto">
+                    View <?= escapeHtml($service['name']) ?>
                 </a>
             </div>
         </div>
-    </div>
+    </article>
 <?php endforeach; ?>

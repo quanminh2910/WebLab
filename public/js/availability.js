@@ -12,8 +12,16 @@ if (availabilityForm) {
         activeRequest?.abort();
         times.replaceChildren();
         if (confirmBooking) confirmBooking.disabled = true;
-        if (!staff.validity.valid || !date.validity.valid) {
-            status.textContent = "Choose a specialist and a valid date.";
+        if (!date.validity.valid) {
+            date.setAttribute("aria-invalid", "true");
+            status.textContent = date.validity.rangeUnderflow
+                ? "Choose today or a future date."
+                : "Enter a valid appointment date.";
+            return;
+        }
+        date.removeAttribute("aria-invalid");
+        if (!staff.validity.valid) {
+            status.textContent = "Choose a specialist to see available times.";
             return;
         }
 
@@ -52,7 +60,7 @@ if (availabilityForm) {
             }
             status.textContent = data.times.length
                 ? "Available start times in Ho Chi Minh City"
-                : "No start times are available for this specialist on this date.";
+                : "No start times are available for this specialist on this date. Try another date or specialist.";
         } catch (error) {
             if (!signal.aborted) {
                 status.textContent = "Could not load availability. Select Check times to try again.";

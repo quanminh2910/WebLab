@@ -91,7 +91,7 @@ if ($service !== null) {
         $availabilityError = 'Availability is temporarily unavailable. Please try again later.';
     }
 }
-$pageTitle = $service !== null ? $service['name'] : $errorTitle;
+$pageTitle = $service !== null ? $service['name'] . ' – ' . formatServiceDuration($service) : $errorTitle;
 ?>
 <!DOCTYPE html>
 <html lang="en"<?= themeAttribute() ?>>
@@ -99,6 +99,12 @@ $pageTitle = $service !== null ? $service['name'] : $errorTitle;
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= escapeHtml($pageTitle) ?> | Spa &amp; Beauty Center</title>
+    <?php if ($service !== null): ?>
+        <meta name="description" content="<?= escapeHtml($service['name'] . ' (' . formatServiceDuration($service) . ', ' . formatServicePrice($service) . '). ' . $service['short_description']) ?>">
+    <?php endif; ?>
+    <?php if ($service === null || $method === 'POST'): ?>
+        <meta name="robots" content="noindex">
+    <?php endif; ?>
     <link
         href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
         rel="stylesheet"
@@ -108,9 +114,10 @@ $pageTitle = $service !== null ? $service['name'] : $errorTitle;
 <body>
     <?php require_once __DIR__ . '/../components/header.php'; ?>
 
-    <main class="container py-5">
+    <main id="main-content" class="container py-5" tabindex="-1">
         <?php if ($service !== null): ?>
-            <div class="row align-items-center g-5">
+            <h1 class="mb-4"><?= escapeHtml($service['name']) ?></h1>
+            <div class="row align-items-center gy-4 gx-md-5">
                 <div class="col-md-6">
                     <img
                         src="../public/images/<?= escapeHtml(rawurlencode(basename($service['image']))) ?>"
@@ -120,7 +127,6 @@ $pageTitle = $service !== null ? $service['name'] : $errorTitle;
                 </div>
 
                 <div class="col-md-6">
-                    <h1><?= escapeHtml($service['name']) ?></h1>
                     <p class="text-muted">
                         Category: <?= escapeHtml($service['category_name']) ?>
                     </p>
@@ -158,7 +164,7 @@ $pageTitle = $service !== null ? $service['name'] : $errorTitle;
                                     </div>
                                     <div class="col-sm-6">
                                         <label for="visit-date" class="form-label">Date</label>
-                                        <input id="visit-date" class="form-control" type="date" name="date"
+                                        <input id="visit-date" class="form-control" type="date" name="date" aria-describedby="availability-status"
                                                min="<?= $today ?>" value="<?= escapeHtml($selectedDate) ?>" required>
                                     </div>
                                 </div>
